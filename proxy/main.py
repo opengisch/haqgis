@@ -2,7 +2,8 @@
 # coding: utf-8
 from aioflask import Flask
 from aioflask import request
-import redis.asyncio as redis
+import zmq
+import zmq.asyncio
 import async_timeout
 import logging
 import os
@@ -15,15 +16,24 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 app = Flask(__name__)
 
-pool = redis.BlockingConnectionPool(host='redis')
 
-timeout = 1000
+# Initialize a zeromq context
+context = zmq.asyncio.Context()
+
+# Set up a channel to send work
+ventilator_send = context.socket(zmq.PUSH)
+ventilator_send.bind("tcp://0.0.0.0:5557")
+
+# Set up a channel to receive results
+results_receiver = context.socket(zmq.PULL)
+results_receiver.bind("tcp://0.0.0.0:5558")
+
+timeout = 10
 
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 async def catch_all(path):
-    r = await redis.Redis(connection_pool=pool)
     job_id = str(uuid4())
 
     logging.info(f"Path {path} requested")
@@ -34,27 +44,18 @@ async def catch_all(path):
         'id': job_id,
         'path': path
     }
-    async with r.pipeline() as p:
-        p.rpush("jobs", json.dumps(job))
-        await p.execute()
+    ventilator_send.send_json(job)
 
-        async with r.pubsub() as ps:
-            await ps.subscribe("notifications")
-            async with async_timeout.timeout(timeout):
-                while True:
-                    message = await ps.get_message(timeout=timeout)
-                    logging.info(message)
-                    try:
-                        if message and message.get("data").decode() == job_id:
-                            break
-                    except:
-                        continue  # Message could not be decoed
-                    await asyncio.sleep(
-                        0.01
-                    )  # We normally should not run in a spin loop, but better safe than sorry
-
-    data = await r.hget(job_id, "data")
-    return data
+    try:
+        async with async_timeout.timeout(timeout):
+            while True:
+                meta, data = await results_receiver.recv_multipart()
+                metadata = json.loads(meta)
+                if metadata['id'] == job_id:
+                    logging.info(meta)
+                    return data, metadata['status_code'], metadata['headers']
+    except TimeoutError:
+        return 'Timeout'
 
 
 if __name__ == "__main__":

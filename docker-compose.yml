@@ -20,7 +20,4 @@ services:
       - ./scripts:/io/scripts
     restart:
       unless-stopped
-
-  redis:
-    image: redis:7.0.7-alpine
-
+    scale: 2
