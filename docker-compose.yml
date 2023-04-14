@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  qgis-server:
+    build:
+      context: proxy
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./proxy:/app
+    restart:
+      unless-stopped
+
+  worker:
+    build:
+      context: worker
+    volumes:
+      - ./worker:/app
+      - ./projects:/io/projects
+      - ./scripts:/io/scripts
+    restart:
+      unless-stopped
+
+  redis:
+    image: redis:7.0.7-alpine
+

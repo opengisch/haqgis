@@ -1,0 +1,3 @@
+aioflask
+flask==2.1.3
+redis
