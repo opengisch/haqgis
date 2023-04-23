@@ -16,12 +16,12 @@ services:
       context: worker
     volumes:
       - ./worker:/app
-      - ./projects:/io/projects
+      - ./projects:/io/data
       - ./scripts:/io/scripts
     restart:
       unless-stopped
     deploy:
-      replicas: 1
+      replicas: 5
 
   redis:
     image: redis:7.0.11-alpine

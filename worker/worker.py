@@ -1,12 +1,10 @@
 import logging
-import random
 import sys
-import time
 
 from arq.connections import RedisSettings
 from httpx import AsyncClient
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 async def startup(ctx):
@@ -17,18 +15,19 @@ async def shutdown(ctx):
     await ctx["session"].aclose()
 
 
-async def download_content(ctx, url, method, data):
+async def download_content(ctx, url, method, params, headers, data):
     session: AsyncClient = ctx["session"]
+
     source_path = f"http://localhost/{url}"
     if method.upper() == "GET":
-        response = await session.get(source_path)
+        response = await session.get(source_path, params=params, headers=headers)
     elif method.upper() == "POST":
-        response = await session.post(source_path)
+        response = await session.post(source_path, params=params, headers=headers)
     else:
         raise RuntimeError(f"Method {method} not implemented")
-    wait = random.random() * 10
-    logging.info(f"Waiting {wait} seconds")
-    time.sleep(wait)
+    # wait = random.random() * 10
+    # logging.info(f"Waiting {wait} seconds")
+    # time.sleep(wait)
     return response
 
 
