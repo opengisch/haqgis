@@ -1,7 +1,7 @@
 FROM python:latest
 WORKDIR /app
-COPY REQUIREMENTS.txt /app
-RUN pip install -r REQUIREMENTS.txt
+COPY requirements.txt /app
+RUN pip install -r requirements.txt
 COPY main.py /app
-EXPOSE 5000
-ENTRYPOINT ["python3", "main.py"]
+EXPOSE 8000
+CMD ["uvicorn", "--host", "0.0.0.0", "main:app"]

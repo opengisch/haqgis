@@ -5,7 +5,7 @@ services:
     build:
       context: proxy
     ports:
-      - "5000:5000"
+      - "8000:8000"
     volumes:
       - ./proxy:/app
     restart:
@@ -20,4 +20,5 @@ services:
       - ./scripts:/io/scripts
     restart:
       unless-stopped
-    scale: 2
+    deploy:
+      replicas: 0
