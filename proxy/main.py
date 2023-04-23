@@ -1,6 +1,8 @@
-from aioflask import Flask
 import logging
 import sys
+
+from aioflask import Flask
+
 from proxy import proxy
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)

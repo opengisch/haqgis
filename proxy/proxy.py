@@ -1,12 +1,9 @@
-from aioflask import Blueprint, request, g, make_response
+import asyncio
+import logging
+
+from aioflask import Blueprint, g, make_response, request
 from arq import create_pool
 from arq.connections import RedisSettings
-import redis
-from uuid import uuid4
-import logging
-import os
-import httpx
-import asyncio
 
 proxy = Blueprint("proxy", __name__)
 
@@ -40,18 +37,7 @@ async def catch_all(path):
 
         except asyncio.TimeoutError:
             if i == 2:
-                raise
+                return "Timeout"
             job.abort()
             logging.info(f"Retrying job {job.job_id} ({i+2} of 3)")
             continue
-
-    try:
-        async with async_timeout.timeout(timeout):
-            while True:
-                meta, data = await results_receiver.recv_multipart()
-                metadata = json.loads(meta)
-                if metadata["id"] == job_id:
-                    logging.info(meta)
-                    return data
-    except TimeoutError:
-        return "Timeout"

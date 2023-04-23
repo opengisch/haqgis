@@ -1,11 +1,10 @@
-import asyncio
-from httpx import AsyncClient
-from arq import create_pool
-from arq.connections import RedisSettings
 import logging
-import sys
 import random
+import sys
 import time
+
+from arq.connections import RedisSettings
+from httpx import AsyncClient
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
