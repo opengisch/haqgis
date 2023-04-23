@@ -21,4 +21,7 @@ services:
     restart:
       unless-stopped
     deploy:
-      replicas: 0
+      replicas: 1
+
+  redis:
+    image: redis:7.0.11-alpine

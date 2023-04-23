@@ -55,4 +55,6 @@ if [ -z "$SKIP_NGINX" ] || [ "$SKIP_NGINX" == "false" ] || [ "$SKIP_NGINX" == "0
 fi
 # To avoid issues with GeoPackages when scaling out QGIS should not run as root
 spawn-fcgi -n -u ${QGIS_USER:-www-data} -g ${QGIS_USER:-www-data} -d ${HOME:-/var/lib/qgis} -P /run/qgis.pid -p 9993 -- /usr/lib/cgi-bin/qgis_mapserv.fcgi &
-python3 /app/main.py
+
+arq worker.WorkerSettings
+
