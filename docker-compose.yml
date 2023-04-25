@@ -21,7 +21,14 @@ services:
     restart:
       unless-stopped
     deploy:
-      replicas: 5
+      replicas: 2
+    environment:
+      # Timeout in seconds
+      TIMEOUT: 0.01
+      # Maximum retry count for failed jobs
+      RETRIES: 10
+      # Comma separated list of projects
+      PRELOAD_PROJECTS: 'simple_bee_farming'
 
   redis:
     image: redis:7.0.11-alpine
