@@ -18,10 +18,8 @@ async def get_redis_connection():
 
 
 timeout = int(os.environ.get("TIMEOUT", 30))  # Timeout in seconds
-retries = int(os.environ.get("RETRIES", 3))  # Number of retries on timeout
 
 logging.info(f"Timeout {timeout} seconds")
-logging.info(f"{retries} retries")
 
 
 @proxy.route("/", defaults={"path": ""}, methods=["GET", "POST"])
@@ -45,7 +43,7 @@ async def catch_all(path):
         request.get_data(),
     )
 
-    job_response = await job.result()
+    job_response = await job.result(timeout=timeout)
     response = make_response(job_response.content)
     response.headers = dict(job_response.headers)
     return response

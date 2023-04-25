@@ -10,6 +10,10 @@ services:
       - ./proxy:/app
     restart:
       unless-stopped
+    environment:
+     # Timeout in seconds. After this time, jobs will fail, regardless if they have been tried enough times
+     # E.g. when no worker is around at all
+      TIMEOUT: 60
 
   worker:
     build:
@@ -23,8 +27,10 @@ services:
     deploy:
       replicas: 2
     environment:
-      # Timeout in seconds
-      TIMEOUT: 0.01
+      # Timeout in seconds after which the worker should give up and restart the job
+      # TODO ... In this case we assume that QGIS is dead. So we could also just immediately die and exit and restart
+      # the container
+      TIMEOUT: 10
       # Maximum retry count for failed jobs
       RETRIES: 10
       # Comma separated list of projects
